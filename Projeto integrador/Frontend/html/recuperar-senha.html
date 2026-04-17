@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha | Sensora</title>
+    <link rel="icon" type="image/png" href="../img/sensor-logo.png">
+    <link rel="stylesheet" href="../css/estilo.css">
+    <link rel="stylesheet" href="../css/recuperar-senha.css">
+</head>
+<body class="pagina-recuperar-senha">
+    <main class="container-recuperar-senha">
+        <div class="cartao-recuperar-senha-wrapper">
+            <div class="logo-recuperar-senha">
+                <img src="../img/sensor-logo.png" alt="Sensor Logo" class="imagem-logo-recuperar-senha">
+                <span class="texto-logo-recuperar-senha">Sensora</span>
+            </div>
+            <div class="cartao-recuperar-senha">
+                <h1 class="titulo-recuperar-senha">Recuperar Senha</h1>
+                <p class="subtitulo-recuperar-senha">Digite seu email e a nova senha</p>
+                
+                <form id="formRecuperar">
+                    <div class="grupo-campo">
+                        <label for="email">Email cadastrado:</label>
+                        <input type="email" id="email" class="entrada-campo" placeholder="seu@email.com" required>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="novaSenha">Nova Senha:</label>
+                        <input type="password" id="novaSenha" class="entrada-campo" placeholder="Mínimo 6 caracteres" required>
+                    </div>
+                    <div class="grupo-campo">
+                        <label for="confirmarSenha">Confirmar Nova Senha:</label>
+                        <input type="password" id="confirmarSenha" class="entrada-campo" placeholder="Confirme a nova senha" required>
+                    </div>
+                    
+                    <div id="mensagem" style="margin-top: 15px; text-align: center;"></div>
+                    
+                    <div class="acoes-formulario">
+                        <button type="submit" class="botao-primario">Alterar Senha</button>
+                    </div>
+                    <div class="links-auxiliares">
+                        <a href="../index.html">Voltar para o Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/dark-mode.js"></script>
+    
+    <script>
+        document.getElementById('formRecuperar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+            const msgDiv = document.getElementById('mensagem');
+            const botao = document.querySelector('button[type="submit"]');
+            
+            // Validações
+            if (!email || !novaSenha || !confirmarSenha) {
+                msgDiv.innerHTML = '<span style="color: red;">Todos os campos são obrigatórios</span>';
+                return;
+            }
+            
+            if (novaSenha !== confirmarSenha) {
+                msgDiv.innerHTML = '<span style="color: red;">As senhas não coincidem</span>';
+                return;
+            }
+            
+            if (novaSenha.length < 6) {
+                msgDiv.innerHTML = '<span style="color: red;">A senha deve ter pelo menos 6 caracteres</span>';
+                return;
+            }
+            
+            botao.disabled = true;
+            botao.textContent = 'Alterando...';
+            msgDiv.innerHTML = '<span style="color: blue;">Alterando senha...</span>';
+            
+            try {
+                const response = await fetch('http://10.110.12.73:1880/api/recuperar-senha', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, novaSenha, confirmarSenha })
+                });
+                
+                const dados = await response.json();
+                
+                if (dados.success) {
+                    msgDiv.innerHTML = '<span style="color: green;">Senha alterada com sucesso! Redirecionando...</span>';
+                    setTimeout(() => window.location.href = '../index.html', 2000);
+                } else {
+                    msgDiv.innerHTML = `<span style="color: red;">${dados.error || 'Erro ao alterar senha'}</span>`;
+                }
+            } catch (erro) {
+                msgDiv.innerHTML = '<span style="color: red;">Erro de conexão com o servidor</span>';
+            } finally {
+                botao.disabled = false;
+                botao.textContent = 'Alterar Senha';
+            }
+        });
+    </script>
+
+    <button class="botao-dark-mode" id="botaoDarkMode">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+        </svg>
+        <span>Escuro</span>
+    </button>
+</body>
+</html>
